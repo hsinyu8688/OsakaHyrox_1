@@ -1,315 +1,284 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hyrox Osaka 2026</title>
-    
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+import React, { useState, useEffect } from 'react';
+import { 
+  Plane, Coffee, Utensils, MapPin, Bed, Dumbbell, 
+  ShoppingBag, Wine, Martini, Ticket, Pizza, Train, 
+  Info, AlertTriangle, CheckSquare, X, Backpack 
+} from 'lucide-react';
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+export default function App() {
+  const [activeTab, setActiveTab] = useState('d1');
+  const [showPacking, setShowPacking] = useState(false);
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-            background-color: #f8fafc; /* Slate-50 */
-            -webkit-tap-highlight-color: transparent;
-        }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .timeline-line {
-            position: absolute; left: 24px; top: 28px; bottom: 0; width: 2px; background-color: #cbd5e1; z-index: 0;
-        }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    </style>
-</head>
-<body>
-
-<div id="root"></div>
-
-<script type="text/babel">
-
-    const { useState, useEffect } = React;
-
-    // --- 資料區 ---
-    const scheduleData = {
-        days: [
-            { id: 'd1', date: '1/29', day: '四', title: 'Day 1: 潛入大阪' },
-            { id: 'd2', date: '1/30', day: '五', title: 'Day 2: Hyrox 比賽日' },
-            { id: 'd3', date: '1/31', day: '六', title: 'Day 3: 美食復健' },
-            { id: 'd4', date: '2/1', day: '日', title: 'Day 4: 環球影城' },
-            { id: 'd5', date: '2/2', day: '一', title: 'Day 5: 潮流歸途' },
-            { id: 'pack', date: '清單', day: '🎒', title: '行李 & VJW' }
-        ],
-        content: {
-            d1: [
-                { time: '09:55', type: 'flight', title: '🛬 Ariel 抵達 (BR178)', desc: '長榮航空，早上抵達 KIX。' },
-                { time: '17:50', type: 'flight', title: '🛬 Suzanne 抵達 (CI172)', desc: '華航，傍晚抵達 KIX。' },
-                { time: '18:10', type: 'flight', title: '🛫 Abby & Sharon 起飛', desc: 'Jetstar GK54 (TPE -> KIX)' },
-                { time: '21:40', type: 'info', title: '🛬 Abby & Sharon 抵達', desc: '請競走去過海關，深夜櫃檯少。' },
-                { time: '22:40', type: 'train', title: '🚆 南海電鐵 (Abby/Sharon)', desc: '搭乘「空港急行」前往難波站。' },
-                { time: '23:40', type: 'subway', title: '🚇 轉乘地鐵往本町', desc: '從難波轉「御堂筋線」至本町站。' },
-                { time: '23:55', type: 'hotel', title: '🏨 MYSTAYS 御堂筋本町', desc: '', link: 'https://goo.gl/maps/xyz' }
-            ],
-            d2: [
-                { time: '10:30', type: 'coffee', title: '☕ Hiraoka Coffee', desc: '百年老店甜甜圈+手沖。走路5分。', link: 'https://www.google.com/maps/search/?api=1&query=Hiraoka+Coffee+Osaka' },
-                { time: '12:30', type: 'food', title: '🍜 宇佐美亭 松葉屋', desc: '必點：雜炊烏龍麵 (おじやうどん)，雙重碳水超補！', link: 'https://maps.app.goo.gl/cHZid' },
-                { time: '13:30', type: 'shrine', title: '⛩️ 難波神社', desc: '參拜神木，祈求無傷完賽。', link: 'https://www.google.com/maps/search/?api=1&query=天政+烏龍麵+難波5' },
-                { time: '14:00', type: 'sleep', title: '🛌 回飯店午睡', desc: '睡 90 分鐘，儲備電力。' },
-                { time: '17:00', type: 'info', title: '🍌 賽前輕食', desc: '吃香蕉/能量膠墊胃。' },
-                { time: '20:00', type: 'race', title: '🏋️ Hyrox Race Start!', desc: '18:00 從本町搭中央線直達 INTEX Osaka。', link: 'https://www.google.com/maps/search/?api=1&query=INTEX+Osaka' },
-                { time: '23:00', type: 'food', title: '🍖 深夜慶功宴', desc: '找 24H 燒肉或居酒屋 (如：鳥貴族)。' }
-            ],
-            d3: [
-                { time: '12:00', type: 'food', title: '🥩 日本橋 鶴屋', desc: '頂級 A5 和牛壽喜燒 (需預約)。', link: 'https://www.google.com/maps/search/?api=1&query=Sukiyaki+Syabu-Syabu+Nihonbashi+Tsuruya' },
-                { time: '15:00', type: 'coffee', title: '☕ Mel Coffee Roasters', desc: '新町本店。世界級精品咖啡。', link: 'https://www.google.com/maps/search/?api=1&query=Mel+Coffee+Roasters+Osaka' },
-                { time: '16:00', type: 'shop', title: '🛍️ Orange Street', desc: 'Supreme, Carhartt 潮流逛街。' },
-                { time: '19:00', type: 'sushi', title: '🍣 おすしのリュー', desc: '精緻 Omakase 壽司 (需預約)。', link: 'https://maps.app.goo.gl/Uatp4xJPycdh3yVr7' },
-                { time: '21:10', type: 'wine', title: '🍷 & FUJIMARU', desc: '東心齋橋都市釀酒廠，Draft Wine。', link: 'https://maps.app.goo.gl/gm6LQBeTgjnwdy6B7' },
-                { time: '22:45', type: 'bar', title: '🍸 Bar Nayuta', desc: '隱藏式酒吧 Speakeasy。', link: 'https://www.google.com/maps/search/?api=1&query=Bar+Nayuta+Osaka' }
-            ],
-            d4: [
-                { time: '09:00', type: 'fun', title: '🌍 USJ 環球影城', desc: '主攻：任天堂、哈利波特。必買快通！', link: 'https://www.google.com/maps/search/?api=1&query=Universal+Studios+Japan' },
-                { time: '19:30', type: 'food', title: '🥞 晚餐：大阪燒', desc: '道頓堀 千房或美津の。' }
-            ],
-            d5: [
-                { time: '10:00', type: 'info', title: '🧳 退房 & 寄行李', desc: '' },
-                { time: '11:30', type: 'pizza', title: '🍕 Henry\'s PIZZA', desc: '谷町四丁目，VERDY 主理紐約披薩。', link: 'https://www.google.com/maps/search/?api=1&query=Henry\'s+PIZZA+Osaka' },
-                { time: '12:45', type: 'flight', title: '🛫 Suzanne 回程起飛 (CI157)', desc: '華航，下午班機。請提早 2 小時到機場。' },
-                { time: '14:00', type: 'shop', title: '🏙️ 市區最後衝刺', desc: '梅田百貨或難波補貨 (Abby/Sharon)。' },
-                { time: '20:30', type: 'train', title: '🚆 前往機場', desc: '搭南海電鐵 Rapi:t。' },
-                { time: '23:10', type: 'flight', title: '🛫 Abby & Sharon 回程 (GK51)', desc: 'Jetstar，預計 01:30 (+1) 抵達台北。' }
-            ]
-        }
-    };
-
-    // --- 元件區 ---
-
-    const Icon = ({ type }) => {
-        const iconMap = {
-            flight: '✈️', info: 'ℹ️', train: '🚆', subway: '🚇', hotel: '🏨',
-            coffee: '☕', food: '🍜', shrine: '⛩️', sleep: '🛌', race: '🏋️',
-            shop: '🛍️', sushi: '🍣', wine: '🍷', bar: '🍸', fun: '🎢', pizza: '🍕'
-        };
-        const colors = {
-            flight: 'bg-blue-100 text-blue-600',
-            race: 'bg-red-100 text-red-600',
-            food: 'bg-orange-100 text-orange-600',
-            hotel: 'bg-indigo-100 text-indigo-600',
-            coffee: 'bg-amber-100 text-amber-700',
-            bar: 'bg-purple-100 text-purple-600',
-            fun: 'bg-green-100 text-green-600',
-            info: 'bg-slate-200 text-slate-600',
-            sleep: 'bg-indigo-50 text-indigo-400'
-        };
-        const colorClass = colors[type] || 'bg-white border border-slate-200 text-slate-500';
-
-        return (
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 z-10 ${colorClass} shadow-sm border-2 border-white`}>
-                {iconMap[type] || '📍'}
-            </div>
-        );
-    };
-
-    const CheckItem = ({ label, note, link, isUrgent }) => {
-        const [checked, setChecked] = useState(false);
-        return (
-            <label className={`flex items-start p-4 rounded-xl border transition-all cursor-pointer select-none mb-3 ${
-                checked 
-                ? 'bg-green-50 border-green-200 shadow-none' 
-                : 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-300'
-            }`}>
-                <div className="relative flex items-center h-6">
-                    <input 
-                        type="checkbox" 
-                        checked={checked} 
-                        onChange={() => setChecked(!checked)}
-                        className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 transition-all duration-200" 
-                    />
-                </div>
-                <div className="ml-3 flex-1">
-                    <div className="flex flex-wrap justify-between items-start gap-2">
-                        <span className={`block font-medium text-base ${checked ? 'text-green-800 line-through decoration-green-500/50' : 'text-slate-800'}`}>
-                            {label}
-                        </span>
-                        {link && (
-                            <a href={link} target="_blank" className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full hover:bg-blue-100 transition-colors flex items-center" onClick={(e) => e.stopPropagation()}>
-                                🔗 點此申請
-                            </a>
-                        )}
-                    </div>
-                    {note && (
-                        <span className={`text-sm block mt-1 ${isUrgent ? "text-red-500 font-bold" : "text-slate-500"}`}>
-                            {note}
-                        </span>
-                    )}
-                </div>
-            </label>
-        );
-    };
-
-    // --- 主程式 App ---
-    function App() {
-        const [activeTab, setActiveTab] = useState('d1');
-
-        // 確保 Lucide Icons 載入
-        useEffect(() => {
-            if (window.lucide) {
-                window.lucide.createIcons();
-            }
-        });
-
-        const currentDay = scheduleData.days.find(d => d.id === activeTab);
-        const events = scheduleData.content[activeTab];
-
-        return (
-            <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-safe-bottom shadow-2xl relative flex flex-col">
-                
-                {/* Header */}
-                <header className="bg-slate-900 text-white pt-8 pb-4 px-6 sticky top-0 z-50 shadow-lg">
-                    <div className="flex justify-between items-end">
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight">Hyrox Osaka</h1>
-                            <p className="text-slate-400 text-sm font-medium mt-1">1/29 - 2/2 | 遠征計畫 🇯🇵</p>
-                        </div>
-                        <div className="text-4xl animate-bounce">🏃</div>
-                    </div>
-                </header>
-
-                {/* Tabs Navigation */}
-                <div className="bg-white border-b border-slate-200 sticky top-[88px] z-40 shadow-sm">
-                    <div className="flex overflow-x-auto no-scrollbar py-3 px-2 space-x-2">
-                        {scheduleData.days.map((day) => (
-                            <button
-                                key={day.id}
-                                onClick={() => setActiveTab(day.id)}
-                                className={`flex-shrink-0 px-3 py-2 rounded-xl flex flex-col items-center min-w-[72px] transition-all duration-300 ${
-                                    activeTab === day.id 
-                                    ? 'bg-slate-800 text-white shadow-lg scale-105 transform' 
-                                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                                }`}
-                            >
-                                <span className={`text-xs font-bold ${activeTab === day.id ? 'text-slate-200' : 'text-slate-400'}`}>{day.date}</span>
-                                <span className="text-base font-bold mt-0.5">{day.day}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Main Content Area */}
-                <main className="p-5 flex-1 overflow-y-auto pb-24">
-                    
-                    {/* Page Title */}
-                    <div className="mb-6 flex items-center animate-fade-in-up">
-                        <div className={`h-8 w-1.5 rounded-full mr-3 ${activeTab === 'pack' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-                        <h2 className="text-xl font-bold text-slate-800">{currentDay.title}</h2>
-                    </div>
-
-                    {/* Conditional Rendering */}
-                    {activeTab !== 'pack' ? (
-                        <div className="relative space-y-8 pb-4">
-                            {/* Vertical Line */}
-                            <div className="timeline-line"></div>
-
-                            {events.map((item, idx) => (
-                                <div key={idx} className="relative flex items-start group">
-                                    <Icon type={item.type} />
-                                    
-                                    <div className="ml-5 flex-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-100 transition-all cursor-default">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md tracking-wide">
-                                                {item.time}
-                                            </span>
-                                            {item.link && (
-                                                <a href={item.link} target="_blank" className="text-blue-500 hover:text-white hover:bg-blue-500 p-1.5 rounded-full transition-colors bg-blue-50" onClick={(e) => e.stopPropagation()}>
-                                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                                                </a>
-                                            )}
-                                        </div>
-                                        <h3 className="text-lg font-bold text-slate-800 leading-tight">{item.title}</h3>
-                                        {item.desc && <p className="text-sm text-slate-500 mt-2 leading-relaxed border-t border-slate-50 pt-2">{item.desc}</p>}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="space-y-8">
-                            
-                            {/* Urgent Notice */}
-                            <div className="bg-red-50 border-l-4 border-red-500 p-5 rounded-r-xl shadow-sm">
-                                <h3 className="flex items-center text-red-800 font-bold mb-3 text-lg">
-                                    <span className="text-2xl mr-2">🚨</span> 行前緊急確認 (URGENT)
-                                </h3>
-                                <div className="space-y-0">
-                                     <CheckItem 
-                                        label="Visit Japan Web (VJW)" 
-                                        note="⚠️ 抵達前 6 小時務必完成！"
-                                        link="https://vjw-lp.digital.go.jp/zh-hant/" 
-                                        isUrgent={true}
-                                    />
-                                    <CheckItem label="USJ 門票 & 快通" note="確認手機憑證是否下載" />
-                                    <CheckItem label="鶴屋訂位" note="再次確認飯店是否代訂成功" />
-                                    <CheckItem label="壽司預約" note="確認 Email 預約信" />
-                                </div>
-                            </div>
-
-                             {/* Important Notice */}
-                             <div className="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl shadow-sm">
-                                <h3 className="flex items-center text-amber-800 font-bold mb-3">
-                                    <span className="text-xl mr-2">⚠️</span> 特別注意事項
-                                </h3>
-                                <ul className="list-disc list-inside text-sm text-amber-800 space-y-2 font-medium">
-                                    <li><b>賽後保暖：</b> 1月底大阪晚上極冷(0-5度)，海邊風大，務必帶<b>厚羽絨/毛帽</b>。</li>
-                                    <li><b>現金準備：</b> 老店(如平岡)只收現金，建議每人帶 2-3 萬日幣。</li>
-                                </ul>
-                            </div>
-
-                            {/* Packing Lists */}
-                            <div>
-                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 pl-1">🏋️ Hyrox 比賽裝備</h3>
-                                <div>
-                                    <CheckItem label="比賽鞋 (抓地力)" />
-                                    <CheckItem label="比賽襪 (長襪防磨)" />
-                                    <CheckItem label="比賽服 (短褲/緊身)" />
-                                    <CheckItem label="護膝 / 護腕" />
-                                    <CheckItem label="能量膠 / 電解質" />
-                                    <CheckItem label="毛巾 & 乾衣物" note="賽後更換" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 pl-1">👔 生活 & 3C</h3>
-                                <div>
-                                    <CheckItem label="羽絨外套 / 毛帽 / 手套" />
-                                    <CheckItem label="發熱衣 (Heattech)" />
-                                    <CheckItem label="Smart Casual 服裝" note="吃壽司用" />
-                                    <CheckItem label="護照" />
-                                    <CheckItem label="轉接頭 & 行動電源" />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </main>
-
-                <footer className="bg-slate-50 border-t p-6 text-center text-xs text-slate-400 mt-auto safe-bottom">
-                    <p className="font-medium">Made for Hyrox Osaka 2026 Trip</p>
-                </footer>
-            </div>
-        );
+  // --- 資料區 ---
+  const scheduleData = {
+    days: [
+      { id: 'd1', date: '1/29', day: '四', title: 'Day 1: 潛入大阪' },
+      { id: 'd2', date: '1/30', day: '五', title: 'Day 2: Hyrox 比賽日' },
+      { id: 'd3', date: '1/31', day: '六', title: 'Day 3: 美食復健' },
+      { id: 'd4', date: '2/1', day: '日', title: 'Day 4: 環球影城' },
+      { id: 'd5', date: '2/2', day: '一', title: 'Day 5: 潮流歸途' }
+    ],
+    content: {
+      d1: [
+        { time: '09:55', type: 'flight', title: '🛬 Ariel 抵達 (BR178)', desc: '長榮航空，早上抵達 KIX。' },
+        { time: '17:50', type: 'flight', title: '🛬 Suzanne 抵達 (CI172)', desc: '華航，傍晚抵達 KIX。' },
+        { time: '18:10', type: 'flight', title: '🛫 Abby & Sharon 起飛', desc: 'Jetstar GK54 (TPE -> KIX)' },
+        { time: '21:40', type: 'info', title: '🛬 Abby & Sharon 抵達', desc: '請競走去過海關，深夜櫃檯少。' },
+        { time: '22:40', type: 'train', title: '🚆 南海電鐵 (Abby/Sharon)', desc: '搭乘「空港急行」前往難波站。' },
+        { time: '23:40', type: 'subway', title: '🚇 轉乘地鐵往本町', desc: '從難波轉「御堂筋線」至本町站。' },
+        { time: '23:55', type: 'hotel', title: '🏨 MYSTAYS 御堂筋本町', desc: '', link: 'https://goo.gl/maps/xyz' }
+      ],
+      d2: [
+        { time: '10:30', type: 'coffee', title: '☕ Hiraoka Coffee', desc: '百年老店甜甜圈+手沖。走路5分。', link: 'https://www.google.com/maps/search/?api=1&query=Hiraoka+Coffee+Osaka' },
+        { time: '12:30', type: 'pizza', title: '🍕 Henry\'s PIZZA', desc: '賽前碳水補充！谷町四丁目，VERDY 主理。', link: 'https://www.google.com/maps/search/?api=1&query=Henry\'s+PIZZA+Osaka' },
+        { time: '14:00', type: 'shrine', title: '🦁 難波八阪神社', desc: '必拍巨大獅子頭！祈求勝利與金運。', link: 'https://www.google.com/maps/place/Namba+Yasaka+Jinja/@34.6631375,135.4965823,17z/data=!3m1!4b1!4m6!3m5!1s0x6000e76dd6551671:0x39775fb9523f2255!8m2!3d34.6631375!4d135.4965823!16s%2Fm%2F049vy0_?entry=ttu' },
+        { time: '16:00', type: 'food', title: '🥞 お好み焼 美津の', desc: '賽前碳水大補給 (Carb Loading)！必吃大阪燒。', link: 'https://www.google.com/maps/search/?api=1&query=Okonomiyaki+Mizuno' },
+        { time: '18:00', type: 'info', title: '🚇 出發前往會場', desc: '本町搭中央線直達 INTEX Osaka (Cosmosquare)。' },
+        { time: '20:00', type: 'race', title: '🏋️ Hyrox Race Start!', desc: '享受比賽！Go for it!', link: 'https://www.google.com/maps/search/?api=1&query=INTEX+Osaka' },
+        { time: '23:00', type: 'sushi', title: '🍣 新鮮酒場すしやねん 本町店', desc: '賽後慶功！就在飯店附近，輕鬆吃喝。', link: 'https://www.google.com/maps/search/?api=1&query=Shinsen+Sakaba+Sushiyanen+Honmachi+Branch' }
+      ],
+      d3: [
+        { time: '12:00', type: 'food', title: '🥩 日本橋 鶴屋', desc: '頂級 A5 和牛壽喜燒 (需預約)。', link: 'https://www.google.com/maps/search/?api=1&query=Sukiyaki+Syabu-Syabu+Nihonbashi+Tsuruya' },
+        { time: '15:00', type: 'coffee', title: '☕ Mel Coffee Roasters', desc: '新町本店。世界級精品咖啡。', link: 'https://www.google.com/maps/search/?api=1&query=Mel+Coffee+Roasters+Osaka' },
+        { time: '16:00', type: 'shop', title: '🛍️ Orange Street', desc: 'Supreme, Carhartt 潮流逛街。' },
+        { time: '19:00', type: 'sushi', title: '🍣 おすしのリュー', desc: '精緻 Omakase 壽司 (需預約)。', link: 'https://maps.app.goo.gl/Uatp4xJPycdh3yVr7' },
+        { time: '21:10', type: 'wine', title: '🍷 & FUJIMARU', desc: '東心齋橋都市釀酒廠，Draft Wine。', link: 'https://maps.app.goo.gl/YSpLfeN6KqtEWVKh8' },
+        { time: '22:45', type: 'bar', title: '🍸 Bar Nayuta', desc: '隱藏式酒吧 Speakeasy。', link: 'https://www.google.com/maps/search/?api=1&query=Bar+Nayuta+Osaka' }
+      ],
+      d4: [
+        { time: '09:00', type: 'fun', title: '🌍 USJ 環球影城', desc: '主攻：任天堂、哈利波特。必買快通！', link: 'https://www.google.com/maps/search/?api=1&query=Universal+Studios+Japan' },
+        { time: '19:30', type: 'food', title: '🍖 生ホルモン いただき', desc: '堺筋本町店。新鮮內臟燒肉，補充體力！', link: 'https://www.google.com/maps/search/?api=1&query=Nama+Horumon+Itadaki+Sakaisuji+Honmachi' }
+      ],
+      d5: [
+        { time: '10:00', type: 'info', title: '🧳 退房 & 寄行李', desc: '建議帶去難波站寄放。' },
+        { time: '11:00', type: 'food', title: '🍋 新宿焼肉 牛たんの檸檬', desc: '大阪本店。極厚切牛舌，完美的 Ending！', link: 'https://www.google.com/maps/search/?api=1&query=Shinjuku+Yakiniku+Gyutan+no+Lemon+Osaka+Main+Store' },
+        { time: '12:45', type: 'flight', title: '🛫 Suzanne 回程起飛 (CI157)', desc: '華航，下午班機。' },
+        { time: '12:55', type: 'flight', title: '🛫 Ariel 回程起飛 (BR131)', desc: '長榮航空，下午班機。' },
+        { time: '14:00', type: 'shop', title: '🏙️ 市區最後衝刺', desc: '梅田百貨或難波補貨 (Sharon)。' },
+        { time: '14:50', type: 'flight', title: '🛫 Abby 回程起飛 (GK55)', desc: 'Jetstar 午班機。' },
+        { time: '20:30', type: 'train', title: '🚆 前往機場', desc: '搭南海電鐵 Rapi:t (Sharon)。' },
+        { time: '23:10', type: 'flight', title: '🛫 Sharon 回程起飛 (GK51)', desc: 'Jetstar，預計 01:30 (+1) 抵達台北。' }
+      ]
     }
+  };
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-</script>
+  const togglePacking = () => setShowPacking(!showPacking);
+  const currentDay = scheduleData.days.find(d => d.id === activeTab);
+  const events = scheduleData.content[activeTab];
 
-</body>
-</html>
+  return (
+    <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col shadow-2xl relative overflow-hidden">
+      
+      {/* Header */}
+      <header className="bg-slate-900 text-white pt-8 pb-4 px-6 sticky top-0 z-50 shadow-lg">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">Hyrox Osaka</h1>
+            <p className="text-slate-400 text-xs font-medium mt-0.5">1/29 - 2/2 | 遠征計畫 🇯🇵</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-3xl animate-bounce filter drop-shadow-md">🏃‍♂️</span>
+            <button 
+                onClick={togglePacking}
+                className={`flex items-center px-3 py-1.5 rounded-full text-sm font-bold transition-all ${
+                showPacking 
+                ? 'bg-red-500 text-white ring-2 ring-red-300 shadow-lg scale-105' 
+                : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                }`}
+            >
+                {showPacking ? <X size={16} className="mr-1" /> : <Backpack size={16} className="mr-1" />}
+                {showPacking ? '關閉' : '清單'}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {!showPacking && (
+        <>
+          {/* Tabs Navigation */}
+          <div className="bg-white border-b border-slate-200 sticky top-[76px] z-40 shadow-sm">
+            <div className="flex overflow-x-auto no-scrollbar py-3 px-2 space-x-2">
+              {scheduleData.days.map((day) => (
+                <button
+                  key={day.id}
+                  onClick={() => setActiveTab(day.id)}
+                  className={`flex-shrink-0 px-3 py-2 rounded-xl flex flex-col items-center min-w-[72px] transition-all duration-300 ${
+                    activeTab === day.id 
+                    ? 'bg-slate-800 text-white shadow-lg scale-105 transform' 
+                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                  }`}
+                >
+                  <span className={`text-xs font-bold ${activeTab === day.id ? 'text-slate-200' : 'text-slate-400'}`}>{day.date}</span>
+                  <span className="text-base font-bold mt-0.5">{day.day}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Timeline Content Area */}
+          <main className="p-5 flex-1 overflow-y-auto pb-24 animate-fade-in">
+            <div className="mb-6 flex items-center">
+              <div className="h-8 w-1.5 rounded-full mr-3 bg-blue-500"></div>
+              <h2 className="text-xl font-bold text-slate-800">{currentDay.title}</h2>
+            </div>
+
+            <div className="relative space-y-8 pb-4">
+              {/* Vertical Line */}
+              <div className="absolute left-[23px] top-[28px] bottom-0 w-0.5 bg-slate-300 z-0"></div>
+
+              {events.map((item, idx) => (
+                <div key={idx} className="relative flex items-start group">
+                  <IconWrapper type={item.type} />
+                  
+                  <div className="ml-5 flex-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-100 transition-all cursor-default">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md tracking-wide">
+                        {item.time}
+                      </span>
+                      {item.link && (
+                        <a href={item.link} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-white hover:bg-blue-500 p-1.5 rounded-full transition-colors bg-blue-50" onClick={(e) => e.stopPropagation()}>
+                          <MapPin size={16} />
+                        </a>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800 leading-tight">{item.title}</h3>
+                    {item.desc && <p className="text-sm text-slate-500 mt-2 leading-relaxed border-t border-slate-50 pt-2">{item.desc}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
+        </>
+      )}
+
+      {/* Packing List Overlay */}
+      {showPacking && (
+        <main className="p-5 flex-1 overflow-y-auto pb-24 bg-slate-100 animate-slide-in">
+          <div className="space-y-8">
+            <div className="bg-red-50 border-l-4 border-red-500 p-5 rounded-r-xl shadow-sm">
+              <h3 className="flex items-center text-red-800 font-bold mb-3 text-lg">
+                <AlertTriangle size={20} className="mr-2" /> 行前緊急確認 (URGENT)
+              </h3>
+              <div className="space-y-0">
+                <CheckItem 
+                  label="Visit Japan Web (VJW)" 
+                  note="⚠️ 抵達前 6 小時務必完成！"
+                  link="https://vjw-lp.digital.go.jp/zh-hant/" 
+                  isUrgent={true}
+                />
+                <CheckItem label="USJ 門票 & 快通" note="確認手機憑證是否下載" />
+                <CheckItem label="鶴屋訂位" note="再次確認飯店是否代訂成功" />
+                <CheckItem label="壽司預約" note="確認 Email 預約信" />
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-xl shadow-sm">
+              <h3 className="flex items-center text-amber-800 font-bold mb-3">
+                <Info size={20} className="mr-2" /> 特別注意事項
+              </h3>
+              <ul className="list-disc list-inside text-sm text-amber-800 space-y-2 font-medium">
+                <li><b>賽後保暖：</b> 1月底大阪晚上極冷(0-5度)，海邊風大，務必帶<b>厚羽絨/毛帽</b>。</li>
+                <li><b>現金準備：</b> 老店(如平岡)只收現金，建議每人帶 2-3 萬日幣。</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 pl-1">🏋️ Hyrox 比賽裝備</h3>
+              <div>
+                <CheckItem label="比賽鞋 (抓地力)" />
+                <CheckItem label="比賽襪 (長襪防磨)" />
+                <CheckItem label="比賽服 (短褲/緊身)" />
+                <CheckItem label="護膝 / 護腕" />
+                <CheckItem label="能量膠 / 電解質" />
+                <CheckItem label="毛巾 & 乾衣物" note="賽後更換" />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 pl-1">👔 生活 & 3C</h3>
+              <div>
+                <CheckItem label="羽絨外套 / 毛帽 / 手套" />
+                <CheckItem label="發熱衣 (Heattech)" />
+                <CheckItem label="Smart Casual 服裝" note="吃壽司用" />
+                <CheckItem label="護照" />
+                <CheckItem label="轉接頭 & 行動電源" />
+              </div>
+            </div>
+          </div>
+        </main>
+      )}
+
+      <footer className="bg-slate-50 border-t p-6 text-center text-xs text-slate-400 mt-auto">
+        <p className="font-medium">Made for Hyrox Osaka 2026 Trip 🏃‍♂️</p>
+      </footer>
+    </div>
+  );
+}
+
+// Icon Wrapper Component
+const IconWrapper = ({ type }) => {
+  const iconMap = {
+    flight: Plane, info: Info, train: Train, subway: Train, hotel: Bed,
+    coffee: Coffee, food: Utensils, shrine: MapPin, sleep: Bed, race: Dumbbell,
+    shop: ShoppingBag, sushi: Utensils, wine: Wine, bar: Martini, fun: Ticket, pizza: Pizza
+  };
+  const IconComponent = iconMap[type] || MapPin;
+  
+  const colors = {
+    flight: 'bg-blue-100 text-blue-600',
+    race: 'bg-red-100 text-red-600',
+    food: 'bg-orange-100 text-orange-600',
+    hotel: 'bg-indigo-100 text-indigo-600',
+    coffee: 'bg-amber-100 text-amber-700',
+    bar: 'bg-purple-100 text-purple-600',
+    fun: 'bg-green-100 text-green-600',
+    info: 'bg-slate-200 text-slate-600',
+    sleep: 'bg-indigo-50 text-indigo-400',
+    pizza: 'bg-yellow-100 text-yellow-600'
+  };
+  const colorClass = colors[type] || 'bg-white border border-slate-200 text-slate-500';
+
+  return (
+    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 z-10 ${colorClass} shadow-sm border-2 border-white`}>
+      <IconComponent size={20} />
+    </div>
+  );
+};
+
+// Checkbox Item Component
+const CheckItem = ({ label, note, link, isUrgent }) => {
+  const [checked, setChecked] = useState(false);
+  return (
+    <label className={`flex items-start p-4 rounded-xl border transition-all cursor-pointer select-none mb-3 ${
+      checked 
+      ? 'bg-green-50 border-green-200 shadow-none' 
+      : 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-300'
+    }`}>
+      <div className="relative flex items-center h-6">
+        <input 
+          type="checkbox" 
+          checked={checked} 
+          onChange={() => setChecked(!checked)}
+          className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 transition-all duration-200" 
+        />
+      </div>
+      <div className="ml-3 flex-1">
+        <div className="flex flex-wrap justify-between items-start gap-2">
+          <span className={`block font-medium text-base ${checked ? 'text-green-800 line-through decoration-green-500/50' : 'text-slate-800'}`}>
+            {label}
+          </span>
+          {link && (
+            <a href={link} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full hover:bg-blue-100 transition-colors flex items-center" onClick={(e) => e.stopPropagation()}>
+              🔗 點此申請
+            </a>
+          )}
+        </div>
+        {note && (
+          <span className={`text-sm block mt-1 ${isUrgent ? "text-red-500 font-bold" : "text-slate-500"}`}>
+            {note}
+          </span>
+        )}
+      </div>
+    </label>
+  );
+};
